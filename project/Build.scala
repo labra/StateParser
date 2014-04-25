@@ -11,7 +11,7 @@ object Build extends sbt.Build{
  // I mark lib as release
  val isRelease = true 
 
- def repo = if(isRelease) "scalax-releases" else "scalax-snapshots"
+ def repo = "weso-releases" 
 
  val stateParserVer = "0.0.1"
 

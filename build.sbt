@@ -11,7 +11,8 @@ Build.sharedSettings
 version := Build.currentVersion
 
 libraryDependencies ++= Seq(
-  "com.lihaoyi" %% "utest" % "0.1.3" % "test"
+  "com.lihaoyi" %% "utest" % "0.1.3" % "test",
+  "org.scalatest" % "scalatest_2.10" % "2.1.0-RC2"
 )
 
 testFrameworks += new TestFramework("utest.runner.JvmFramework")

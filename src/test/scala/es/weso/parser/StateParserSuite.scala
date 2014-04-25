@@ -4,13 +4,13 @@ import scala.util.parsing.combinator.RegexParsers
 import org.scalatest.FunSpec
 import util.parsing.input.CharSequenceReader.EofCh
 import org.scalatest.Matchers
+import scala.util.matching.Regex
 
 class StateParserSuite 
 	extends FunSpec 
 	with RegexParsers 
 	with TestParser
 	with StateParser
-	with W3cTokens
 	with Matchers {
 
   describe("OR_AND_with_chainl1") {
@@ -178,6 +178,16 @@ class StateParserSuite
 	object SimpleState {
 		val initial : SimpleState = SimpleState(0)
 	}  
+
+    lazy val WS_STR 			= """\u0020|\u0009|\u000D|\u000A"""
+    lazy val WS = rep ( WS_STR.r 
+		  			  | "#" ~ rep(chrExcept(EofCh, '\n') )
+		  			  )
+  
+    def chrExcept(cs: Char*) = elem("", ch => (cs forall (ch != _)))
+
+    def acceptRegex(name : String, r : Regex) : Parser[String] = 
+    ( r | failure(name + " expected with regular expression " + r))
 
 	/** 
 	 *  Parses a term and updates the state

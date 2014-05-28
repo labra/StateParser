@@ -13,9 +13,9 @@ object Build extends sbt.Build{
 
  def repo = "weso-releases" 
 
- val stateParserVer = "0.0.1"
+ val stateParserVer = "0.0.2"
 
- publishMavenStyle := false
+ publishMavenStyle := true
 
  val currentVersion = stateParserVer
 
@@ -30,7 +30,7 @@ object Build extends sbt.Build{
 
     licenses += ("MPL-2.0", url("http://opensource.org/licenses/MPL-2.0")),
 
-    bintrayPublishIvyStyle := true
+    bintrayPublishIvyStyle := false
   )
 
 

@@ -3,6 +3,10 @@ import scala.util.parsing.combinator._
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
 
+/**
+ * StateParser contains an extension of Scala Parser combinators
+ * that can pass a state along the parsers  
+ */
 trait StateParser extends Parsers {
 
   

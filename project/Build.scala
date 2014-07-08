@@ -13,7 +13,7 @@ object Build extends sbt.Build{
 
  def repo = "weso-releases" 
 
- val stateParserVer = "0.0.2"
+ val stateParserVer = "0.0.3"
 
  publishMavenStyle := true
 
@@ -25,11 +25,8 @@ object Build extends sbt.Build{
 
  lazy val publishSettings = Seq(
     repository in bintray := this.repo,
-
     bintrayOrganization in bintray := Some("weso"),
-
     licenses += ("MPL-2.0", url("http://opensource.org/licenses/MPL-2.0")),
-
     bintrayPublishIvyStyle := false
   )
 
@@ -47,7 +44,7 @@ object Build extends sbt.Build{
   val sharedSettings = Seq(
       organization := "es.weso",
       name := "stateParser",
-      scalaVersion := "2.10.4"
+      scalaVersion := "2.11.1"
     )
 
   val scalajsResolver: URLRepository = Resolver.url("scala-js-releases",

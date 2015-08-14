@@ -2,26 +2,56 @@ import sbt._
 import sbt.Keys._
 import bintray.Plugin.bintraySettings
 import bintray.Keys._
-import scala.scalajs.sbtplugin.ScalaJSPlugin.ScalaJSKeys._
+import ScoverageSbtPlugin._
 
-lazy val root = project.in(file("."))//.settings(crossScalaVersions := Seq("2.10.4", "2.11.0"))
+lazy val root = project.in(file("."))
 
-Build.sharedSettings
+organization := "es.weso"
 
-version := Build.currentVersion
+name := "stateParser"
+
+scalaVersion := "2.11.7"
+
+version := "0.0.4"
 
 libraryDependencies ++= Seq(
-  "com.lihaoyi" %% "utest" % "0.1.3" % "test",
-  "org.scalatest" % "scalatest_2.11" % "2.2.0",
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1"
+  "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"  
 )
-
-testFrameworks += new TestFramework("utest.runner.JvmFramework")
-
-addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.2")
 
 autoCompilerPlugins := true
 
+// Publishing settings to BinTray
+
 bintraySettings
 
-Build.publishSettings
+publishMavenStyle := true
+
+repository in bintray := "weso-releases"
+
+bintrayOrganization in bintray := Some("weso")
+
+licenses += ("MPL-2.0", url("http://opensource.org/licenses/MPL-2.0"))
+
+resolvers += "Bintray" at "http://dl.bintray.com/weso/weso-releases"
+
+// Publish site info
+site.settings
+
+site.publishSite
+
+site.includeScaladoc()
+
+
+lazy val scoverageSettings = Seq(
+  ScoverageKeys.coverageMinimum := 50,
+  ScoverageKeys.coverageFailOnMinimum := false
+)
+
+
+
+
+
+
+bintraySettings
+

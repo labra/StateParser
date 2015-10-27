@@ -2,29 +2,40 @@ import sbt._
 import sbt.Keys._
 import ScoverageSbtPlugin._
 
-lazy val root = project.in(file("."))
+lazy val root = project.in(file(".")).
+  aggregate(stateParserJS, stateParserJVM).
+  settings(
+    publish := {},
+    publishLocal := {}
+  )
 
-organization := "es.weso"
-
-name := "stateParser"
-
-scalaVersion := "2.11.7"
-
-version := "0.0.8"
-
-libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"  
-)
-
-libraryDependencies ++= Seq(
-  	   "org.scalatest" %%% "scalatest" % "3.0.0-M10" % "test"
-)
-
-
-autoCompilerPlugins := true
-
-// Publishing settings to BinTray
-
+lazy val stateParser = crossProject.
+  crossType(CrossType.Pure).
+  settings(
+    name := "stateParser",
+    version := "0.1.0",
+    scalaVersion := "2.11.7", 
+    organization := "es.weso",
+	libraryDependencies ++= Seq(
+	  "org.scalatest" %%% "scalatest" % "3.0.0-M10" % "test"
+	)
+  ).
+  jvmSettings(
+	libraryDependencies ++= Seq(
+		"org.scala-lang.modules" %%% "scala-parser-combinators" % "1.0.4"
+    ),
+	licenses += ("MPL-2.0", url("http://opensource.org/licenses/MPL-2.0"))
+  ).
+  jsSettings(
+	libraryDependencies ++= Seq(
+       "org.scala-js" %%% "scala-parser-combinators" % "1.0.2"
+    ),
+	licenses += ("MPL-2.0", url("http://opensource.org/licenses/MPL-2.0"))
+  )
+  
+lazy val stateParserJVM = stateParser.jvm
+lazy val stateParserJS = stateParser.js  
+	 
 publishMavenStyle := true
 
 bintrayRepository in bintray := "weso-releases"
@@ -35,12 +46,15 @@ licenses += ("MPL-2.0", url("http://opensource.org/licenses/MPL-2.0"))
 
 resolvers += "Bintray" at "http://dl.bintray.com/weso/weso-releases"
 
+EclipseKeys.useProjectId := true
+
 // Publish site info
 site.settings
 
 site.publishSite
 
 site.includeScaladoc()
+
 
 lazy val scoverageSettings = Seq(
   ScoverageKeys.coverageMinimum := 50,

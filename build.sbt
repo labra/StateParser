@@ -1,7 +1,5 @@
 import sbt._
 import sbt.Keys._
-import bintray.Plugin.bintraySettings
-import bintray.Keys._
 import ScoverageSbtPlugin._
 
 lazy val root = project.in(file("."))
@@ -12,22 +10,24 @@ name := "stateParser"
 
 scalaVersion := "2.11.7"
 
-version := "0.0.4"
+version := "0.0.8"
 
 libraryDependencies ++= Seq(
-  "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"  
 )
+
+libraryDependencies ++= Seq(
+  	   "org.scalatest" %%% "scalatest" % "3.0.0-M10" % "test"
+)
+
 
 autoCompilerPlugins := true
 
 // Publishing settings to BinTray
 
-bintraySettings
-
 publishMavenStyle := true
 
-repository in bintray := "weso-releases"
+bintrayRepository in bintray := "weso-releases"
 
 bintrayOrganization in bintray := Some("weso")
 
@@ -42,16 +42,8 @@ site.publishSite
 
 site.includeScaladoc()
 
-
 lazy val scoverageSettings = Seq(
   ScoverageKeys.coverageMinimum := 50,
   ScoverageKeys.coverageFailOnMinimum := false
 )
-
-
-
-
-
-
-bintraySettings
 

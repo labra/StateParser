@@ -141,7 +141,7 @@ class StateParserSuite
 
   }
 
-  describe("sepRepState") {
+  describe("seqRepState") {
     val s = SimpleState.initial
     val parserABs = (s: SimpleState) => seqRepState(newS("A"), newS("B"))(s)
     shouldParseGeneric(parserABs(s), "ABB", ((0, List(1, 2)), SimpleState(3)))
@@ -150,10 +150,26 @@ class StateParserSuite
     shouldNotParse(parserABs(s), "AAB")
     shouldNotParse(parserABs(s), "ABC")
   }
+  
+   describe("seq3State") {
+    val s = SimpleState.initial
+    val parserA: StateParser[SimpleState,Int] = newS("A")
+    val parserBString = newS_String("B")
+    val parserC = newS("C")
+    val seq3 : StateParser[SimpleState,(Int,String,Int)] = 
+      seq3State(parserA,parserBString,parserC)
+
+    shouldParseGeneric(seq3State(parserA,parserA,parserA)(s), "AAA", ((0,1,2), SimpleState(3)))
+    shouldParseGeneric(seq3(s), "ABC", ((0,"1!",2), SimpleState(3)))
+    shouldNotParse(seq3(s), "A")
+    shouldNotParse(seq3(s), "B")
+    shouldNotParse(seq3(s), "C")
+  }
+
 
   describe("Grammar DTs (similar to turtleDoc)") {
     val s = SimpleState.initial
-    val D = newS("D")_
+    val D : StateParser[SimpleState,Int]= newS("D")
     val Ts = (s: SimpleState) => repState(s, newS("T"))
     val Stmt = (s: SimpleState) => D(s) | (Ts(s) <~ ".")
     val Doc = (s: SimpleState) => repState(s, Stmt)
@@ -194,11 +210,23 @@ class StateParserSuite
   /**
    *  Parses a term and updates the state
    */
-  def newS(term: String)(s: SimpleState): Parser[(Int, SimpleState)] =
+  def newS(term: String): StateParser[SimpleState, Int] = {s =>
     (opt(WS) ~>
       acceptRegex("term(" + term + ")", term.r)) ^^^
       { s.newState }
-
+  }
+  
+  /**
+   *  Parses a term and updates the state
+   */
+  def newS_String(term: String): StateParser[SimpleState, String] = {s =>
+    (opt(WS) ~>
+      acceptRegex("term(" + term + ")", term.r)) ^^^
+      { val newState = s.newState
+        (newState._1 + "!", newState._2) 
+      }
+  }
+  
 }
 
 

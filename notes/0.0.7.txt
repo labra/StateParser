@@ -1,0 +1,12 @@
+New features in this version
+============================
+
+- Support for ScalaJs cross-compiling 
+
+
+ TODOs
+------
+
+- Documentation & tests
+
+- Parser monad

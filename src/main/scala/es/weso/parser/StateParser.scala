@@ -14,16 +14,16 @@ trait StateParser extends Parsers {
    * It could (and should) be defined as a StateT
    */
   type StateParser[S, A] = S => Parser[(A, S)]
-
+  
   def seqRepState[S, A, B](
     first: StateParser[S, A],
-    rep: StateParser[S, B]): StateParser[S, (A,List[B])] = { s =>
+    rep: StateParser[S, B]): StateParser[S, (A, List[B])] = { s =>
     for {
       (x, s1) <- first(s)
-      (ys, s2) <- repState(s1, rep)
+      (ys, s2) <- repS(rep)(s1)
     } yield ((x, ys), s2)
   }
-
+  
   /**
    * Should be private
    * @deprecated
@@ -60,14 +60,22 @@ trait StateParser extends Parsers {
     }
   }
 
-  def rep1sepState[T, S](s: S,
-                         p: StateParser[S, T],
-                         q: => Parser[Any]): Parser[(List[T], S)] =
+  def rep1sepState[T, S](p: StateParser[S, T],
+                         q: => Parser[Any]): StateParser[S, List[T]] = { s =>
     p(s) >> { s1 =>
       repState(s1._2, arrowState(p, q)) ^^ {
         case (ls, s2) => (s1._1 :: ls, s2)
       }
     }
+  }
+
+  /*
+   * @deprecated
+   */
+  def rep1sepState[T, S](s: S,
+                         p: StateParser[S, T],
+                         q: => Parser[Any]): Parser[(List[T], S)] =
+    rep1sepState(p, q)(s)
 
   def chainl1State[T, S](p: StateParser[S, T],
                          q: StateParser[S, (T, T) => T]): StateParser[S, T] = { s =>
@@ -96,20 +104,54 @@ trait StateParser extends Parsers {
         | success((None, s)))
     }
   }
-
+  
   def seqState[T, U, S](
     p: StateParser[S, T],
     q: StateParser[S, U]): StateParser[S, T ~ U] = { s =>
-    {
-      p(s) >> { s1 => q(s1._2) ^^ { case (u, s2) => (new ~(s1._1, u), s2) } }
-    }
+    for {
+      (x,s1) <- p(s)
+      (y,s2) <- q(s1)
+    } yield (new ~(x,y),s2)
+  }
+  
+    def seq3State[A,B,C,S](
+      p1: StateParser[S,A],
+      p2: StateParser[S,B],
+      p3: StateParser[S,C]): StateParser[S, (A, B, C)] = { s =>
+    for {
+      (x,s1) <- p1(s)
+      (y,s2) <- p2(s1)
+      (z,s3) <- p3(s2)
+    } yield ((x,y,z), s3)
   }
 
+  /**
+   * Parses p and then any (ignoring parsed value of any)
+   * @deprecated: Should be arrowRight
+   */
   def arrowState[T, S](
     p: StateParser[S, T],
-    q: Parser[Any]): StateParser[S, T] = { s =>
+    any: Parser[Any]): StateParser[S, T] = arrowRightState(p,any)
+
+  /**
+   * Parses any and then p (ignoring parsed value of any)
+   */
+  def arrowRightState[T, S](
+    p: StateParser[S, T],
+    any: Parser[Any]): StateParser[S, T] = { s =>
     {
-      q ~> p(s)
+      any ~> p(s)
+    }
+  }
+  
+ /**
+   * Parses p and then any (ignoring parsed value of any)
+   */
+  def arrowLeftState[T, S](
+    p: StateParser[S, T],
+    any: Parser[Any]): StateParser[S, T] = { s =>
+    {
+      p(s) <~ any
     }
   }
 
@@ -117,21 +159,21 @@ trait StateParser extends Parsers {
    * Repeat a parser and collect the results
    */
   def rep1State[T, S](
-      p: StateParser[S,T]): StateParser[S,List[T]] = { s => {
-    rep1State(s, p, p)
+    p: StateParser[S, T]): StateParser[S, List[T]] = { s =>
+    {
+      rep1State(s, p, p)
+    }
   }
-  }
-    
 
   /**
-   * @deprecated 
+   * @deprecated
    */
-  def rep1State[T, S](s: S, p: StateParser[S,T]): Parser[(List[T], S)] =
+  def rep1State[T, S](s: S, p: StateParser[S, T]): Parser[(List[T], S)] =
     rep1State(s, p, p)
 
   def rep1State[T, S](s: S,
-                      first: StateParser[S,T],
-                      p0: StateParser[S,T]): Parser[(List[T], S)] =
+                      first: StateParser[S, T],
+                      p0: StateParser[S, T]): Parser[(List[T], S)] =
     Parser { in =>
       lazy val p = p0 // lazy argument
       val elems: ListBuffer[T] = new ListBuffer[T]

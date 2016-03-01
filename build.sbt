@@ -10,10 +10,10 @@ lazy val root = project.in(file(".")).
   )
 
 lazy val stateParser = crossProject.
-  crossType(CrossType.Pure).
+  crossType(CrossType.Full).
   settings(
     name := "stateParser",
-    version := "0.1.0",
+    version := "0.1.1",
     scalaVersion := "2.11.7", 
     organization := "es.weso",
 	libraryDependencies ++= Seq(
@@ -54,10 +54,4 @@ site.settings
 site.publishSite
 
 site.includeScaladoc()
-
-
-lazy val scoverageSettings = Seq(
-  ScoverageKeys.coverageMinimum := 50,
-  ScoverageKeys.coverageFailOnMinimum := false
-)
 

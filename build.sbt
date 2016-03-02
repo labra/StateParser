@@ -46,6 +46,9 @@ licenses += ("MPL-2.0", url("http://opensource.org/licenses/MPL-2.0"))
 
 resolvers += "Bintray" at "http://dl.bintray.com/weso/weso-releases"
 
+resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
+
+
 EclipseKeys.useProjectId := true
 
 // Publish site info

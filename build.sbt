@@ -16,7 +16,8 @@ lazy val stateParser = crossProject.
     scalaVersion := "2.11.7", 
     organization := "es.weso",
 	libraryDependencies ++= Seq(
-	  "org.scalatest" %%% "scalatest" % "3.0.0-M10" % "test"
+	  "org.scala-lang" % "scala-compiler" % scalaVersion.value  
+    , "org.scalatest" %%% "scalatest" % "3.0.0-M10" % "test"
 	)
   ).
   jvmSettings(

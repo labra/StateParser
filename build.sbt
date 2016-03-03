@@ -1,6 +1,5 @@
 import sbt._
 import sbt.Keys._
-import ScoverageSbtPlugin._
 
 lazy val root = project.in(file(".")).
   aggregate(stateParserJS, stateParserJVM).

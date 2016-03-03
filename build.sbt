@@ -58,3 +58,9 @@ site.publishSite
 
 site.includeScaladoc()
 
+scalacOptions in (Compile, doc) <++= baseDirectory.map {
+  (bd: File) => Seq[String](
+     "-sourcepath", bd.getAbsolutePath,
+     "-doc-source-url", "https://github.com/labra/StateParser/tree/master€{FILE_PATH}.scala"
+  )
+}

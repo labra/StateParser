@@ -12,8 +12,8 @@ lazy val stateParser = crossProject.
   crossType(CrossType.Full).
   settings(
     name := "stateParser",
-    version := "0.1.2",
-    scalaVersion := "2.11.7", 
+    version := "0.1.3",
+    scalaVersion := "2.11.8", 
     organization := "es.weso",
 	libraryDependencies ++= Seq(
 	  "org.scala-lang" % "scala-compiler" % scalaVersion.value  

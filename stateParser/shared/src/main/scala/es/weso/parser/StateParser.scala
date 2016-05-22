@@ -11,7 +11,7 @@ trait StateParser extends Parsers {
 
   /**
    * A State Parser is a Parser that modifies a state
-   * It could (and should) be defined as a StateT
+   * <p> TODO: It could be defined as a State transformer monad
    */
   type StateParser[S, A] = S => Parser[(A, S)]
   
@@ -34,29 +34,43 @@ trait StateParser extends Parsers {
 
   /**
    * repS takes a parser a repeats it until it fails
-   * threading the state along the repetitions *
+   * threading the state along the repetitions 
+   * @tparam T type of values
+   * @tparam S type of state
+   * @param p parser to repeat
+   * @return parser of a list of values
    */
   def repS[T, S](p: StateParser[S, T]): StateParser[S, List[T]] = { s =>
     rep1State(s, p) | success((List(), s))
   }
 
-  def rep1sepOptState[T, S](s: S,
-                            p: StateParser[S, T],
-                            q: => Parser[Any]): Parser[(List[T], S)] =
+
+  /**
+   * repeat a parser followed by an optional separator parser whose result is ignored several times
+   * @tparam T type returned by parser
+   * @tparam S type of state
+   * @param p parser
+   *  
+   * 
+   */
+  def rep1sepOptState[T, S](p: StateParser[S, T],
+                            q: => Parser[Any]): StateParser[S,List[T]] = { s =>
     p(s) >> { s1 =>
       repState(s1._2, arrowOptState(p, q)) ^^ {
         case (ls, s2) => (s1._1 :: ls.flatten, s2)
       }
     }
+  }
 
+  /**
+   *   
+   */
   def arrowOptState[T, S](
-    p: StateParser[S, T],
-    q: Parser[Any]): StateParser[S, Option[T]] = { s =>
-    {
-      q ~> opt(p(s)) ^^ {
+      p: StateParser[S, T],
+      q: Parser[Any]): StateParser[S, Option[T]] = { s =>
+    q ~> opt(p(s)) ^^ {
         case None          => (None, s)
         case Some((t, s1)) => (Some(t), s1)
-      }
     }
   }
 
@@ -72,10 +86,10 @@ trait StateParser extends Parsers {
   /*
    * @deprecated
    */
-  def rep1sepState[T, S](s: S,
+  /* def rep1sepState[T, S](s: S,
                          p: StateParser[S, T],
                          q: => Parser[Any]): Parser[(List[T], S)] =
-    rep1sepState(p, q)(s)
+    rep1sepState(p, q)(s) */
 
   def chainl1State[T, S](p: StateParser[S, T],
                          q: StateParser[S, (T, T) => T]): StateParser[S, T] = { s =>
@@ -114,17 +128,62 @@ trait StateParser extends Parsers {
     } yield (new ~(x,y),s2)
   }
   
-    def seq3State[A,B,C,S](
+  def seq3State[A,B,C,S](
       p1: StateParser[S,A],
       p2: StateParser[S,B],
-      p3: StateParser[S,C]): StateParser[S, (A, B, C)] = { s =>
+      p3: StateParser[S,C]): StateParser[S, (A, B, C)] = { s => 
     for {
       (x,s1) <- p1(s)
       (y,s2) <- p2(s1)
       (z,s3) <- p3(s2)
     } yield ((x,y,z), s3)
   }
+    
+  def seq4State[A,B,C,D,S](
+      p1: StateParser[S,A],
+      p2: StateParser[S,B],
+      p3: StateParser[S,C],
+      p4: StateParser[S,D]): StateParser[S, (A, B, C, D)] = { s =>
+    for {
+      (x1,s1) <- p1(s)
+      (x2,s2) <- p2(s1)
+      (x3,s3) <- p3(s2)
+      (x4,s4) <- p4(s3)
+    } yield ((x1,x2,x3,x4), s4)
+  }
+  
+  def seq5State[A,B,C,D,E,S](
+      p1: StateParser[S,A],
+      p2: StateParser[S,B],
+      p3: StateParser[S,C],
+      p4: StateParser[S,D],
+      p5: StateParser[S,E]): StateParser[S, (A, B, C, D, E)] = { s =>
+    for {
+      (x1,s1) <- p1(s)
+      (x2,s2) <- p2(s1)
+      (x3,s3) <- p3(s2)
+      (x4,s4) <- p4(s3)
+      (x5,s5) <- p5(s4)
+    } yield ((x1,x2,x3,x4,x5), s5)
+  }
 
+  def seq6State[A,B,C,D,E,F,S](
+      p1: StateParser[S,A],
+      p2: StateParser[S,B],
+      p3: StateParser[S,C],
+      p4: StateParser[S,D],
+      p5: StateParser[S,E],
+      p6: StateParser[S,F]): StateParser[S, (A, B, C, D, E, F)] = { s =>
+    for {
+      (x1,s1) <- p1(s)
+      (x2,s2) <- p2(s1)
+      (x3,s3) <- p3(s2)
+      (x4,s4) <- p4(s3)
+      (x5,s5) <- p5(s4)
+      (x6,s6) <- p6(s5)
+    } yield ((x1,x2,x3,x4,x5,x6), s6)
+  }
+   
   /**
    * Parses p and then any (ignoring parsed value of any)
    * @deprecated: Should be arrowRight

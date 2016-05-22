@@ -133,14 +133,14 @@ class StateParserSuite
 
   describe("rep1sepState") {
     val s = SimpleState.initial
-    val parserAs = (s: SimpleState) => rep1sepState(s, newS("A"), ",")
+    val parserAs : StateParser[SimpleState, List[Int]] = rep1sepState(newS("A"), ",")
     shouldParseGeneric(parserAs(s), "A,A", (List(0, 1), SimpleState(2)))
     shouldParseGeneric(parserAs(s), "A", (List(0), SimpleState(1)))
     shouldNotParse(parserAs(s), "")
 
-    val parserWithColon = rep1sepOptState(s, parserAs, ";")
-    shouldParseGeneric(parserWithColon, "A,A;A", (List(List(0, 1), List(2)), SimpleState(3)))
-    shouldParseGeneric(parserWithColon, "A,A;A,A", (List(List(0, 1), List(2, 3)), SimpleState(4)))
+    val parserWithColon : StateParser[SimpleState, List[List[Int]]] = rep1sepState(parserAs, ";")
+    shouldParseGeneric(parserWithColon(s), "A,A;A", (List(List(0, 1), List(2)), SimpleState(3)))
+    shouldParseGeneric(parserWithColon(s), "A,A;A,A", (List(List(0, 1), List(2, 3)), SimpleState(4)))
 
   }
 
